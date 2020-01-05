@@ -1,0 +1,99 @@
+<idea-plugin>
+    <id>pl.suzuyo.code-generator</id>
+    <name>Code generator</name>
+    <version>1.0.0</version>
+    <vendor email="szydadawid@gmail.com">Dawid Szyda</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <description>
+        <![CDATA[
+            <h2>Provides action for generate code from custom templates</h2>
+            <hr/>
+            <h3>Features</h3>
+            <ul>
+                <li>Export and import templates to IDEA</li>
+                <li>Creates custom template with Groovy language using</li>
+            </ul>
+            <h3>Documentation</h3>
+            <h4>How open code generator?</h4>
+            <p>Right-click, select generate option and next select code option</p>
+            <h4>Imports templates</h4>
+            <ol>
+                <li>Click <strong>import</strong> button</li>
+                <li>Select file with templates (file must be with json extension)</li>
+                <li>Select templates to import</li>
+            </ol>
+            <h4>Exports templates</h4>
+            <ol>
+                <li>Click <strong>export</strong> button</li>
+                <li>Select catalog to save</li>
+                <li>Select templates to export</li>
+            </ol>
+            <h4>Creates new template</h4>
+            <ol>
+                <li>Click <strong>Add</strong> button</li>
+                <li>Fill name and type of template</li>
+                <li>Fill init script tab, script tab and parameters tab</li>
+                <li>Click <strong>Save</strong> button</li>
+            </ol>
+            <h4>Script tab</h4>
+            <p>In the script tab may write custom code to generate</p>
+            <ul>
+                <li>The script must be written in Java language</li>
+                <li>Can add custom variables, example $(FIELD_NAME)</li>
+            </ul>
+            <h4>Init script tab</h4>
+            <p>In the init script tab may fill variables for script</p>
+            <ul>
+                <li>The init script must be written in Groovy language</li>
+                <li>Available variables
+                    <ul>
+                        <li>activeFile (file with caret inside)</li>
+                        <li>activeClass (class with caret inside)</li>
+                        <li>selectedField (selected field by caret)</li>
+                        <li>selectedType (selected type by caret)</li>
+                        <li>selectedParameter (selected parameter by caret)</li>
+                        <li>selectedLiteral (selected literal by caret)</li>
+                        <li>parameters (parameters filled manual)</li>
+                        <li>variables (script variables)</li>
+                    </ul>
+                </li>
+            </ul>
+            <h4>Parameters</h4>
+            <p>In the parameters tab may select script variables to fill manual</p>
+        ]]>
+    </description>
+
+    <change-notes>
+        <![CDATA[
+            <div>
+                <h4>Version 1.0.0</h4>
+                <ul>
+                    <li>Create plugin for generate code</li>
+                </ul>
+            </div>
+        ]]>
+    </change-notes>
+
+    <idea-version since-build="191.6707"/>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="pl.suzuyo.storage.StorageService"/>
+        <applicationService serviceImplementation="pl.suzuyo.template.storage.TemplateStorageFactory"/>
+        <applicationService serviceImplementation="pl.suzuyo.template.TemplateFactory"/>
+        <applicationService serviceImplementation="pl.suzuyo.storage.StorageWriter"/>
+        <applicationService serviceImplementation="pl.suzuyo.storage.StorageReader"/>
+        <applicationService serviceImplementation="pl.suzuyo.template.ScriptService"/>
+        <applicationService serviceImplementation="pl.suzuyo.generator.GeneratorActionEventFactory"/>
+        <applicationService serviceImplementation="pl.suzuyo.generator.GeneratorActionService"/>
+        <applicationService serviceImplementation="pl.suzuyo.MyElementFactory"/>
+        <completion.contributor order="first" language="Groovy" implementationClass="pl.suzuyo.template.InitScriptContributor"/>
+    </extensions>
+
+    <actions>
+        <action id="generator.action" class="pl.suzuyo.generator.GeneratorAction" text="Code" description="Code">
+            <add-to-group group-id="GenerateGroup" anchor="first"/>
+        </action>
+    </actions>
+</idea-plugin>

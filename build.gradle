@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version '0.4.12'
+}
+
+group 'pl.suzuyo'
+version '1.0.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+intellij {
+    version '2019.1.1'
+}
+patchPluginXml {
+    changeNotes """
+    <div>
+        <h4>Version 1.0.0</h4>
+        <ul>
+            <li>Create plugin for generate code</li>
+        </ul>
+    </div>"""
+}
