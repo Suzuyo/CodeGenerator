@@ -1,8 +1,12 @@
 package pl.suzuyo.generator;
 
+import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import pl.suzuyo.parameter.gui.ParametersDialog;
 import pl.suzuyo.generator.gui.GeneratorDialog;
@@ -11,6 +15,14 @@ import pl.suzuyo.template.Template;
 import java.util.*;
 
 public class GeneratorAction extends AnAction {
+
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        PsiFile psiFile = e.getRequiredData(CommonDataKeys.PSI_FILE);
+        FileType fileType = psiFile.getFileType();
+        boolean enableAction = fileType.equals(JavaFileType.INSTANCE);
+        e.getPresentation().setEnabledAndVisible(enableAction);
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
