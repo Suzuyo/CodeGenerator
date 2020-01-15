@@ -28,7 +28,7 @@ public class ParametersDialog extends DialogWrapper {
     @Override
     protected JComponent createCenterPanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+        panel.setLayout(new GridLayout(0, 2));
         for (Map.Entry<JLabel, JTextField> argument : parameters.entrySet()) {
             GridBagConstraints gridBagConstraints = new GridBagConstraints();
             panel.add(argument.getKey(), gridBagConstraints);
