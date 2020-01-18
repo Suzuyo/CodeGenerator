@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>pl.suzuyo.code-generator</id>
     <name>Code generator</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <vendor email="szydadawid@gmail.com">Dawid Szyda</vendor>
 
     <depends>com.intellij.modules.platform</depends>
@@ -68,6 +68,12 @@
     <change-notes>
         <![CDATA[
             <div>
+                <h4>Version 1.0.1</h4>
+                <ul>
+                    <li>Fix generate action inside the file</li>
+                    <li>Fix window with parameters</li>
+                    <li>Fix "cancel" action in the Window of parameters</li>
+                </ul>
                 <h4>Version 1.0.0</h4>
                 <ul>
                     <li>Create plugin for generate code</li>
@@ -76,7 +82,7 @@
         ]]>
     </change-notes>
 
-    <idea-version since-build="191.6707"/>
+    <idea-version since-build="191.0"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="pl.suzuyo.storage.StorageService"/>

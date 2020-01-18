@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'pl.suzuyo'
-version '1.0.0'
+version '1.0.1'
 
 sourceCompatibility = 1.8
 
@@ -22,6 +22,12 @@ intellij {
 patchPluginXml {
     changeNotes """
     <div>
+        <h4>Version 1.0.1</h4>
+        <ul>
+            <li>Fix generate action inside the file</li>
+            <li>Fix window with parameters</li>
+            <li>Fix "cancel" action in the Window of parameters</li>
+        </ul>
         <h4>Version 1.0.0</h4>
         <ul>
             <li>Create plugin for generate code</li>
