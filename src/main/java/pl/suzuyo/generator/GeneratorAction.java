@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import pl.suzuyo.parameter.gui.ParametersDialog;
@@ -29,13 +30,15 @@ public class GeneratorAction extends AnAction {
         GeneratorActionEvent generatorActionEvent = GeneratorActionEventFactory.getInstance().createByActionEvent(event);
         Template template = new GeneratorDialog().showAndGetTemplate();
         if (template != null) {
-            Map<String, String> parameters = new HashMap<>();
             List<String> parametersNames = template.getParameters();
             if (parametersNames.size() > 0) {
-                parameters = new ParametersDialog(parametersNames).showAndGetParameters();
+                ParametersDialog parametersDialog = new ParametersDialog(parametersNames);
+                Map<String, String> parameters = parametersDialog.showAndGetParameters();
+                if (parametersDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                    List<ElementWriter> elementWriters = GeneratorActionService.getInstance().evaluate(generatorActionEvent, template, parameters);
+                    WriteCommandAction.runWriteCommandAction(generatorActionEvent.getProject(), () -> elementWriters.forEach(ElementWriter::write));
+                }
             }
-            List<ElementWriter> elementWriters = GeneratorActionService.getInstance().evaluate(generatorActionEvent, template, parameters);
-            WriteCommandAction.runWriteCommandAction(generatorActionEvent.getProject(), () -> elementWriters.forEach(ElementWriter::write));
         }
     }
 }
