@@ -3,10 +3,7 @@ package pl.suzuyo;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Document;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiJavaCodeReferenceElement;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import pl.suzuyo.generator.SelectionElement;
 
@@ -45,14 +42,14 @@ public class PsiUtils {
 
     public static PsiElement getSelectedElement(PsiFile file, Caret caret) {
         PsiElement selectedElement = file.findElementAt(caret.getLeadSelectionOffset());
-        if (selectedElement == null) {
-            throw new RuntimeException("Not found selected element");
+        if (selectedElement != null) {
+            PsiElement parent = selectedElement.getParent();
+            if (parent instanceof PsiJavaCodeReferenceElement) {
+                return parent.getParent();
+            }
+            return parent;
         }
-        PsiElement parent = selectedElement.getParent();
-        if (parent instanceof PsiJavaCodeReferenceElement) {
-            return parent.getParent();
-        }
-        return parent;
+        return file;
     }
 
     private static PsiClass getSelectedElementClass(PsiElement selectedElement) {
