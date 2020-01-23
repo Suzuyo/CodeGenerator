@@ -10,6 +10,8 @@ import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileSaverDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import pl.suzuyo.PsiUtils;
@@ -130,9 +132,35 @@ public class TemplatesComponent extends MyComponent {
                 templatesFilterDialog.setTemplates(new LinkedHashSet<>(Arrays.asList(importTemplates)));
                 Set<Template> filterImportTemplates = templatesFilterDialog.showAndGetTemplates();
                 Set<Template> templates = templateList.getSetItems();
-                templates.addAll(filterImportTemplates);
-                templateList.setItems(templates);
-                templateList.saveToStorage();
+                if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                    List listImportTemplates = new ArrayList(filterImportTemplates);
+                    List listTemplates = new ArrayList(templates);
+                    for (int i = 0; i < filterImportTemplates.size(); i++) {
+                        int count = 1;
+                        String first = String.valueOf(listImportTemplates.get(i));
+                        for (int j = 0; j < templates.size(); j++) {
+                            count++;
+                            String second = String.valueOf(listTemplates.get(j));
+                            if (first.equals(second)) {
+                                TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog("Template about name " + first + " already exists. Do you want to replace it?");
+                                if (templatesImportDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                                    Object templatesToRemove = listTemplates.get(j);
+                                    templates.remove(templatesToRemove);
+                                    templates.add((Template) listImportTemplates.get(i));
+                                    templateList.setItems(templates);
+                                    templateList.saveToStorage();
+                                }
+                                break;
+                            }
+                            if (count > templates.size()) {
+                                templates.add((Template) listImportTemplates.get(i));
+                                templateList.setItems(templates);
+                                templateList.saveToStorage();
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Import failed", e);
@@ -147,11 +175,17 @@ public class TemplatesComponent extends MyComponent {
                     .save(null, "templates.json");
             if (virtualFileWrapper != null) {
                 File file = virtualFileWrapper.getFile();
+                VirtualFile virtualFile = virtualFileWrapper.getVirtualFile();
                 TemplatesFilterDialog templatesFilterDialog = new TemplatesFilterDialog();
                 templatesFilterDialog.setDescription("Select templates to export");
                 templatesFilterDialog.setTemplates(templateList.getSetItems());
                 Set<Template> filterTemplates = templatesFilterDialog.showAndGetTemplates();
-                new ObjectMapper().writeValue(file, filterTemplates);
+                if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                    new ObjectMapper().writeValue(file, filterTemplates);
+                    if (virtualFile != null) {
+                        virtualFile.refresh(false, false);
+                    }
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Export failed", e);
