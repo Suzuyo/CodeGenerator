@@ -129,31 +129,28 @@ public class TemplatesComponent extends MyComponent {
                 Template[] importTemplates = new ObjectMapper().readValue(choose[0].getInputStream(), Template[].class);
                 TemplatesFilterDialog templatesFilterDialog = new TemplatesFilterDialog();
                 templatesFilterDialog.setDescription("Select templates to import");
-                templatesFilterDialog.setTemplates(new LinkedHashSet<>(Arrays.asList(importTemplates)));
-                Set<Template> filterImportTemplates = templatesFilterDialog.showAndGetTemplates();
-                Set<Template> templates = templateList.getSetItems();
+                templatesFilterDialog.setTemplates(Arrays.asList(importTemplates));
+                List<Template> filterImportTemplates = templatesFilterDialog.showAndGetTemplates();
+                List<Template> templates = templateList.getItems();
                 if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-                    List listImportTemplates = new ArrayList(filterImportTemplates);
-                    List listTemplates = new ArrayList(templates);
                     for (int i = 0; i < filterImportTemplates.size(); i++) {
                         int count = 1;
-                        String first = String.valueOf(listImportTemplates.get(i));
+                        String first = filterImportTemplates.get(i).getName();
                         for (int j = 0; j < templates.size(); j++) {
                             count++;
-                            String second = String.valueOf(listTemplates.get(j));
+                            String second = templates.get(j).getName();
                             if (first.equals(second)) {
                                 TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog("Template about name " + first + " already exists. Do you want to replace it?");
+                                templatesImportDialog.showAndGet();
                                 if (templatesImportDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-                                    Object templatesToRemove = listTemplates.get(j);
-                                    templates.remove(templatesToRemove);
-                                    templates.add((Template) listImportTemplates.get(i));
+                                    templates.set(j, filterImportTemplates.get(i));
                                     templateList.setItems(templates);
                                     templateList.saveToStorage();
                                 }
                                 break;
                             }
                             if (count > templates.size()) {
-                                templates.add((Template) listImportTemplates.get(i));
+                                templates.add(filterImportTemplates.get(i));
                                 templateList.setItems(templates);
                                 templateList.saveToStorage();
                                 break;
@@ -178,8 +175,8 @@ public class TemplatesComponent extends MyComponent {
                 VirtualFile virtualFile = virtualFileWrapper.getVirtualFile();
                 TemplatesFilterDialog templatesFilterDialog = new TemplatesFilterDialog();
                 templatesFilterDialog.setDescription("Select templates to export");
-                templatesFilterDialog.setTemplates(templateList.getSetItems());
-                Set<Template> filterTemplates = templatesFilterDialog.showAndGetTemplates();
+                templatesFilterDialog.setTemplates(templateList.getItems());
+                List<Template> filterTemplates = templatesFilterDialog.showAndGetTemplates();
                 if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                     new ObjectMapper().writeValue(file, filterTemplates);
                     if (virtualFile != null) {
