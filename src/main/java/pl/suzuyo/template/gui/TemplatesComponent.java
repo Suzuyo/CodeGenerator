@@ -134,10 +134,8 @@ public class TemplatesComponent extends MyComponent {
                 List<Template> templates = templateList.getItems();
                 if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                     for (int i = 0; i < filterImportTemplates.size(); i++) {
-                        int count = 1;
                         String first = filterImportTemplates.get(i).getName();
                         for (int j = 0; j < templates.size(); j++) {
-                            count++;
                             String second = templates.get(j).getName();
                             if (first.equals(second)) {
                                 TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog("Template about name " + first + " already exists. Do you want to replace it?");
@@ -149,7 +147,7 @@ public class TemplatesComponent extends MyComponent {
                                 }
                                 break;
                             }
-                            if (count > templates.size()) {
+                            if ((j + 1) == templates.size()) {
                                 templates.add(filterImportTemplates.get(i));
                                 templateList.setItems(templates);
                                 templateList.saveToStorage();
