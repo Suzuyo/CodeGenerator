@@ -1,13 +1,15 @@
 package pl.suzuyo.parameter.gui;
 
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.ValidationInfo;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.kohsuke.rngom.util.Localizer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ParametersDialog extends DialogWrapper {
@@ -22,6 +24,7 @@ public class ParametersDialog extends DialogWrapper {
         }
         init();
         setResizable(false);
+        setTitle("Parameters");
     }
 
     @Nullable
@@ -43,5 +46,17 @@ public class ParametersDialog extends DialogWrapper {
     public Map<String, String> showAndGetParameters() {
         super.showAndGet();
         return parameters.entrySet().stream().collect(Collectors.toMap(x -> x.getKey().getText(), y -> y.getValue().getText()));
+    }
+
+    @NotNull
+    @Override
+    protected List<ValidationInfo> doValidateAll() {
+        List<ValidationInfo> validationInfoList = new LinkedList<>();
+        for (Map.Entry<JLabel, JTextField> argument : parameters.entrySet()) {
+            if (argument.getValue().getText().isEmpty()) {
+                validationInfoList.add(new ValidationInfo("", argument.getValue()));
+            }
+        }
+        return validationInfoList;
     }
 }
