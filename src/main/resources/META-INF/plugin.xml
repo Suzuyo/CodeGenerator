@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>pl.suzuyo.code-generator</id>
     <name>Code generator</name>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <vendor email="szydadawid@gmail.com">Dawid Szyda</vendor>
 
     <depends>com.intellij.modules.platform</depends>
@@ -68,6 +68,11 @@
     <change-notes>
         <![CDATA[
             <div>
+                <h4>Version 1.0.2</h4>
+                <ul>
+                    <li>Fix code generates without variables</li>
+                    <li>Fix the code generates with empty parameters</li>
+                </ul>
                 <h4>Version 1.0.1</h4>
                 <ul>
                     <li>Fix generate action inside the file</li>
