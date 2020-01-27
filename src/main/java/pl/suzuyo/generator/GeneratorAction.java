@@ -31,13 +31,14 @@ public class GeneratorAction extends AnAction {
         Template template = new GeneratorDialog().showAndGetTemplate();
         if (template != null) {
             List<String> parametersNames = template.getParameters();
+            ParametersDialog parametersDialog = new ParametersDialog(parametersNames);
+            Map<String, String> parameters = new HashMap<>();
             if (parametersNames.size() > 0) {
-                ParametersDialog parametersDialog = new ParametersDialog(parametersNames);
-                Map<String, String> parameters = parametersDialog.showAndGetParameters();
-                if (parametersDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-                    List<ElementWriter> elementWriters = GeneratorActionService.getInstance().evaluate(generatorActionEvent, template, parameters);
-                    WriteCommandAction.runWriteCommandAction(generatorActionEvent.getProject(), () -> elementWriters.forEach(ElementWriter::write));
-                }
+                parameters = parametersDialog.showAndGetParameters();
+            }
+            if (parametersNames.size() == 0 || parametersDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                List<ElementWriter> elementWriters = GeneratorActionService.getInstance().evaluate(generatorActionEvent, template, parameters);
+                WriteCommandAction.runWriteCommandAction(generatorActionEvent.getProject(), () -> elementWriters.forEach(ElementWriter::write));
             }
         }
     }
