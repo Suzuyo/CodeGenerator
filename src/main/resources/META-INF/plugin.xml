@@ -5,6 +5,7 @@
     <vendor email="szydadawid@gmail.com">Dawid Szyda</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <description>
         <![CDATA[
@@ -87,7 +88,7 @@
         ]]>
     </change-notes>
 
-    <idea-version since-build="191.0"/>
+    <idea-version since-build="193.0"/>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="pl.suzuyo.storage.StorageService"/>
