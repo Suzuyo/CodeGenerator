@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'pl.suzuyo'
-version '1.0.2'
+version '1.1.0'
 
 sourceCompatibility = 1.8
 
@@ -23,6 +23,10 @@ intellij {
 patchPluginXml {
     changeNotes """
     <div>
+        <h4>Version 1.1.0</h4>
+        <ul>
+            <li>Rebuilding import and export process</li>
+        </ul>
         <h4>Version 1.0.2</h4>
         <ul>
             <li>Fix code generates without variables</li>
