@@ -6,6 +6,7 @@ import pl.suzuyo.template.Template;
 
 import javax.swing.*;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class TemplatesFilterComponent extends MyComponent {
@@ -15,12 +16,12 @@ public class TemplatesFilterComponent extends MyComponent {
     private JButton clearButton;
     private JLabel descriptionLabel;
 
-    public void setTemplates(Set<Template> templates) {
+    public void setTemplates(List<Template> templates) {
         templatesList.setItems(templates);
     }
 
-    public Set<Template> getTemplates() {
-        return new LinkedHashSet<>(templatesList.getSelectedValuesList());
+    public List<Template> getTemplates() {
+        return templatesList.getSelectedValuesList();
     }
 
     public void setDescription(String description) {

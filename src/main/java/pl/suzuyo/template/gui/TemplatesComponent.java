@@ -10,6 +10,8 @@ import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileSaverDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import pl.suzuyo.PsiUtils;
@@ -127,12 +129,33 @@ public class TemplatesComponent extends MyComponent {
                 Template[] importTemplates = new ObjectMapper().readValue(choose[0].getInputStream(), Template[].class);
                 TemplatesFilterDialog templatesFilterDialog = new TemplatesFilterDialog();
                 templatesFilterDialog.setDescription("Select templates to import");
-                templatesFilterDialog.setTemplates(new LinkedHashSet<>(Arrays.asList(importTemplates)));
-                Set<Template> filterImportTemplates = templatesFilterDialog.showAndGetTemplates();
-                Set<Template> templates = templateList.getSetItems();
-                templates.addAll(filterImportTemplates);
-                templateList.setItems(templates);
-                templateList.saveToStorage();
+                templatesFilterDialog.setTemplates(Arrays.asList(importTemplates));
+                List<Template> filterImportTemplates = templatesFilterDialog.showAndGetTemplates();
+                List<Template> templates = templateList.getItems();
+                if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                    for (int i = 0; i < filterImportTemplates.size(); i++) {
+                        String first = filterImportTemplates.get(i).getName();
+                        for (int j = 0; j < templates.size(); j++) {
+                            String second = templates.get(j).getName();
+                            if (first.equals(second)) {
+                                TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog("Template about name " + first + " already exists. Do you want to replace it?");
+                                templatesImportDialog.showAndGet();
+                                if (templatesImportDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                                    templates.set(j, filterImportTemplates.get(i));
+                                    templateList.setItems(templates);
+                                    templateList.saveToStorage();
+                                }
+                                break;
+                            }
+                            if ((j + 1) == templates.size()) {
+                                templates.add(filterImportTemplates.get(i));
+                                templateList.setItems(templates);
+                                templateList.saveToStorage();
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Import failed", e);
@@ -147,11 +170,17 @@ public class TemplatesComponent extends MyComponent {
                     .save(null, "templates.json");
             if (virtualFileWrapper != null) {
                 File file = virtualFileWrapper.getFile();
+                VirtualFile virtualFile = virtualFileWrapper.getVirtualFile();
                 TemplatesFilterDialog templatesFilterDialog = new TemplatesFilterDialog();
                 templatesFilterDialog.setDescription("Select templates to export");
-                templatesFilterDialog.setTemplates(templateList.getSetItems());
-                Set<Template> filterTemplates = templatesFilterDialog.showAndGetTemplates();
-                new ObjectMapper().writeValue(file, filterTemplates);
+                templatesFilterDialog.setTemplates(templateList.getItems());
+                List<Template> filterTemplates = templatesFilterDialog.showAndGetTemplates();
+                if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                    new ObjectMapper().writeValue(file, filterTemplates);
+                    if (virtualFile != null) {
+                        virtualFile.refresh(false, false);
+                    }
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Export failed", e);
