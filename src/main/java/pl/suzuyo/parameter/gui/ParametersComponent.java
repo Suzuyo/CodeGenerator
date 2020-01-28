@@ -26,6 +26,10 @@ public class ParametersComponent extends MyComponent {
 
     public void setParameters(List<String> parameters) {
         parameterComboBox.setItems(parameters);
+        if (addedParameterList.getItemsCount() > 0) {
+            addedParameterList.selectFirstOne();
+            parameterRemoveButton.setEnabled(true);
+        }
     }
 
     @Override
@@ -40,14 +44,25 @@ public class ParametersComponent extends MyComponent {
         addedParameterList.addListSelectionListener(this::selectAddedParameters);
     }
 
+    @Override
+    public void initFieldsValues() {
+
+    }
+
     public void clearFieldsValues() {
         addedParameterList.removeAllItems();
         parameterComboBox.setSelectedItem(null);
     }
 
     public void setFieldsAsEditable(boolean editable) {
-        parameterAddButton.setEnabled(editable);
-        parameterComboBox.setEnabled(editable);
+        int itemCount = parameterComboBox.getItemCount();
+        if (itemCount == 0) {
+            parameterComboBox.setEnabled(false);
+            parameterAddButton.setEnabled(false);
+        } else if (itemCount > 0) {
+            parameterComboBox.setEnabled(editable);
+            parameterAddButton.setEnabled(editable);
+        }
     }
 
     private void addParameter() {
@@ -57,21 +72,32 @@ public class ParametersComponent extends MyComponent {
                 parametersEvent.performAfterAdd(selectedItem);
             }
             addedParameterList.addItem(selectedItem);
+            addedParameterList.selectFirstOne();
+            parameterRemoveButton.setEnabled(true);
             parameterComboBox.removeItemAt(parameterComboBox.getSelectedIndex());
             if (parameterComboBox.getItemCount() == 0) {
                 parameterAddButton.setEnabled(false);
+                parameterComboBox.setEnabled(false);
             }
         }
     }
 
     private void removeParameter() {
         String selectedItem = addedParameterList.removeSelectedItem();
-        if (parametersEvent != null) {
-            parametersEvent.performAfterRemove(selectedItem);
+        if (selectedItem != null) {
+            if (parametersEvent != null) {
+                parametersEvent.performAfterRemove(selectedItem);
+            }
+            parameterComboBox.addItem(selectedItem);
+            parameterAddButton.setEnabled(true);
+            parameterComboBox.setEnabled(true);
+            if (addedParameterList.getItemsCount() > 0) {
+                addedParameterList.selectFirstOne();
+            }
+            if (addedParameterList.getItemsCount() == 0) {
+                parameterRemoveButton.setEnabled(false);
+            }
         }
-        parameterComboBox.addItem(selectedItem);
-        parameterRemoveButton.setEnabled(false);
-        parameterAddButton.setEnabled(true);
     }
 
     private void selectAddedParameters(ListSelectionEvent event) {
