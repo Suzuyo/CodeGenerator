@@ -7,12 +7,19 @@ import pl.suzuyo.template.Template;
 
 public class TemplateListPanel extends OperatedListPanel<Template> {
 
+    private boolean checkIndex = false;
+
     public void loadFromStorage() {
         setItems(StorageReader.getInstance().loadTemplates());
-        selectFirstOne();
+        if (!checkIndex) {
+            selectFirstOne();
+        } else {
+            selectLastIndex();
+        }
     }
 
     public void saveToStorage() {
+        checkIndex = true;
         StorageWriter.getInstance().saveTemplates(getItems());
     }
 

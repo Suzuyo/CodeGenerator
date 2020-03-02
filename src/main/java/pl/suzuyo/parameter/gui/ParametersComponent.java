@@ -6,7 +6,7 @@ import pl.suzuyo.common.gui.MyList;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
-import java.util.List;
+import java.util.*;
 
 public class ParametersComponent extends MyComponent {
     private ParametersEvent parametersEvent;
@@ -56,12 +56,18 @@ public class ParametersComponent extends MyComponent {
 
     public void setFieldsAsEditable(boolean editable) {
         int itemCount = parameterComboBox.getItemCount();
+        int listCount = addedParameterList.getItemsCount();
         if (itemCount == 0) {
             parameterComboBox.setEnabled(false);
             parameterAddButton.setEnabled(false);
         } else if (itemCount > 0) {
             parameterComboBox.setEnabled(editable);
             parameterAddButton.setEnabled(editable);
+        }
+        if (listCount == 0) {
+            parameterRemoveButton.setEnabled(false);
+        } else if (listCount > 0) {
+            parameterRemoveButton.setEnabled(editable);
         }
     }
 
@@ -72,9 +78,19 @@ public class ParametersComponent extends MyComponent {
                 parametersEvent.performAfterAdd(selectedItem);
             }
             addedParameterList.addItem(selectedItem);
-            addedParameterList.selectFirstOne();
             parameterRemoveButton.setEnabled(true);
             parameterComboBox.removeItemAt(parameterComboBox.getSelectedIndex());
+            List<String> listSort = new ArrayList<>();
+            for (int i = 0; i < addedParameterList.getItemsCount(); i++) {
+                String items = addedParameterList.getItem(i);
+                listSort.add(items);
+            }
+            Collections.sort(listSort);
+            addedParameterList.removeAllItems();
+            for (int i = 0; i < listSort.size(); i++) {
+                addedParameterList.addItem(listSort.get(i));
+            }
+            addedParameterList.selectFirstOne();
             if (parameterComboBox.getItemCount() == 0) {
                 parameterAddButton.setEnabled(false);
                 parameterComboBox.setEnabled(false);
@@ -91,6 +107,16 @@ public class ParametersComponent extends MyComponent {
             parameterComboBox.addItem(selectedItem);
             parameterAddButton.setEnabled(true);
             parameterComboBox.setEnabled(true);
+            List<String> listSort = new ArrayList<>();
+            for (int i = 0; i < parameterComboBox.getItemCount(); i++) {
+                String items = parameterComboBox.getItemAt(i);
+                listSort.add(items);
+            }
+            Collections.sort(listSort);
+            parameterComboBox.removeAllItems();
+            for (int i = 0; i < listSort.size(); i++) {
+                parameterComboBox.addItem(listSort.get(i));
+            }
             if (addedParameterList.getItemsCount() > 0) {
                 addedParameterList.selectFirstOne();
             }
@@ -104,5 +130,9 @@ public class ParametersComponent extends MyComponent {
         if (event.getValueIsAdjusting()) {
             parameterRemoveButton.setEnabled(true);
         }
+    }
+
+    public int sum() {
+        return parameterComboBox.getItemCount() + addedParameterList.getItemsCount();
     }
 }

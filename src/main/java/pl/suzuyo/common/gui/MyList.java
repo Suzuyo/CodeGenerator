@@ -9,6 +9,7 @@ import java.util.*;
 public class MyList<T> extends JBList<T> {
 
     private DefaultListModel<T> model;
+    private int getIndex;
 
     public MyList() {
         model = new DefaultListModel<>();
@@ -64,6 +65,7 @@ public class MyList<T> extends JBList<T> {
     }
 
     public void removeAllItems() {
+        getIndex = getSelectedIndex();
         model.removeAllElements();
     }
 
@@ -80,6 +82,10 @@ public class MyList<T> extends JBList<T> {
 
     public void selectFirstOne() {
         setSelectedIndex(0);
+    }
+
+    public void selectLastIndex() {
+        setSelectedIndex(getIndex);
     }
 
     public List<T> getItems() {

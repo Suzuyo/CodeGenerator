@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 public class ParametersDialog extends DialogWrapper {
 
-    private Map<JLabel, JTextField> parameters;
+    private LinkedHashMap<JLabel, JTextField> parameters;
 
     public ParametersDialog(List<String> params) {
         super(true);
-        parameters = new HashMap<>();
+        parameters = new LinkedHashMap<>();
         for (String param : params) {
             parameters.put(new JLabel(param), new JTextField());
         }

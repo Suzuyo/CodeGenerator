@@ -5,15 +5,18 @@ import com.intellij.json.JsonFileType;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileSaverDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
-import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
+import com.intellij.ui.JBColor;
+import org.jetbrains.annotations.NotNull;
 import pl.suzuyo.PsiUtils;
 import pl.suzuyo.common.gui.MyComponent;
 import pl.suzuyo.common.gui.OperatedListEvent;
@@ -23,9 +26,11 @@ import pl.suzuyo.template.Template;
 
 import javax.swing.*;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 public class TemplatesComponent extends MyComponent {
     private JPanel rootPanel;
@@ -39,8 +44,10 @@ public class TemplatesComponent extends MyComponent {
     private JButton saveButton;
     private JButton importButton;
     private JButton exportButton;
+    private JTabbedPane jTabbedPanel;
     private Document scriptDocument;
     private ParametersComponent parametersComponent;
+    private Set<String> variablesNames;
 
     @Override
     public JPanel getRootPanel() {
@@ -54,6 +61,8 @@ public class TemplatesComponent extends MyComponent {
         saveButton.addActionListener(event -> updateTemplateByFields());
         importButton.addActionListener(event -> importTemplates());
         exportButton.addActionListener(event -> exportTemplates());
+        scriptDocument.addDocumentListener(new MyDocumentListener());
+        initScriptComponent.addDocumentListener(new MyDocumentListener());
     }
 
     @Override
@@ -71,18 +80,17 @@ public class TemplatesComponent extends MyComponent {
         scriptDocument.setReadOnly(!editable);
         initScriptComponent.setFieldsAsEditable(editable);
         parametersComponent.setFieldsAsEditable(editable);
-        saveButton.setEnabled(editable);
+        saveButton.setEnabled(false);
     }
 
     private void setFieldsByTemplate(Template template) {
         templateNameField.setText(template.getName());
         templateTypeComboBox.setSelectedItem(template.getType());
         parametersComponent.setAddedParameters(template.getParameters());
-        Set<String> variablesWithoutParameters = template.getVariablesWithoutParameters();
-        parametersComponent.setParameters(new ArrayList<>(variablesWithoutParameters));
+        parametersComponent.setParameters(new ArrayList<>(template.getVariablesWithoutParameters()));
         parametersComponent.initFieldsValues();
         initScriptComponent.setScript(template.getInitScript());
-        Set<String> variablesNames = template.getVariables();
+        variablesNames = template.getVariables();
         initScriptComponent.setCompleteVariables(variablesNames);
         PsiUtils.setTextForDocument(scriptDocument, template.getScript());
     }
@@ -104,7 +112,39 @@ public class TemplatesComponent extends MyComponent {
             }
             template.setInitScript(initScriptComponent.getScript());
             template.setScript(scriptDocument.getText());
+            variablesNames = template.getVariables();
+            int countParameters = template.getParameters().size();
+            List<String> templateParameters = new ArrayList<>(template.getParameters());
+            Collections.sort(templateParameters);
+            for (int i = 0; i < templateParameters.size(); i++) {
+                String parameter = templateParameters.get(i);
+                template.removeParameter(parameter);
+                if (template.getParameters().size() == 0) {
+                    for (int j = 0; j < templateParameters.size(); j++) {
+                        parameter = templateParameters.get(j);
+                        template.addParameter(parameter);
+                    }
+                }
+            }
+            if (variablesNames.size() < countParameters || (countParameters > 0 && parametersComponent.sum() != variablesNames.size())) {
+                for (int i = 0; i < countParameters; i++) {
+                    Iterator<String> variablesList = variablesNames.iterator();
+                    boolean foundParameter = false;
+                    String first = templateParameters.get(i);
+                    while (variablesList.hasNext()) {
+                        String second = variablesList.next();
+                        if (first.equals(second)) {
+                            foundParameter = true;
+                            break;
+                        }
+                    }
+                    if (!foundParameter) {
+                        template.removeParameter(first);
+                    }
+                }
+            }
             templateList.saveToStorage();
+            templateList.loadFromStorage();
         }
     }
 
@@ -133,26 +173,34 @@ public class TemplatesComponent extends MyComponent {
                 List<Template> filterImportTemplates = templatesFilterDialog.showAndGetTemplates();
                 List<Template> templates = templateList.getItems();
                 if (templatesFilterDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-                    for (int i = 0; i < filterImportTemplates.size(); i++) {
-                        String first = filterImportTemplates.get(i).getName();
-                        for (int j = 0; j < templates.size(); j++) {
-                            String second = templates.get(j).getName();
-                            if (first.equals(second)) {
-                                TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog("Template about name " + first + " already exists. Do you want to replace it?");
-                                templatesImportDialog.showAndGet();
-                                if (templatesImportDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
-                                    templates.set(j, filterImportTemplates.get(i));
+                    if (templates.size() > 0) {
+                        for (int i = 0; i < filterImportTemplates.size(); i++) {
+                            String first = filterImportTemplates.get(i).getName();
+                            for (int j = 0; j < templates.size(); j++) {
+                                String second = templates.get(j).getName();
+                                if (first.equals(second)) {
+                                    TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog("Template about name " + first + " already exists. Do you want to replace it?");
+                                    templatesImportDialog.showAndGet();
+                                    if (templatesImportDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
+                                        templates.set(j, filterImportTemplates.get(i));
+                                        templateList.setItems(templates);
+                                        templateList.saveToStorage();
+                                    }
+                                    break;
+                                }
+                                if ((j + 1) == templates.size()) {
+                                    templates.add(filterImportTemplates.get(i));
                                     templateList.setItems(templates);
                                     templateList.saveToStorage();
+                                    break;
                                 }
-                                break;
                             }
-                            if ((j + 1) == templates.size()) {
-                                templates.add(filterImportTemplates.get(i));
-                                templateList.setItems(templates);
-                                templateList.saveToStorage();
-                                break;
-                            }
+                        }
+                    } else {
+                        for (Template filterImportTemplate : filterImportTemplates) {
+                            templates.add(filterImportTemplate);
+                            templateList.setItems(templates);
+                            templateList.saveToStorage();
                         }
                     }
                 }
@@ -183,6 +231,8 @@ public class TemplatesComponent extends MyComponent {
                 }
             }
         } catch (IOException e) {
+            String message = e.getMessage();
+            JOptionPane.showMessageDialog(null, message);
             throw new RuntimeException("Export failed", e);
         }
     }
@@ -230,6 +280,25 @@ public class TemplatesComponent extends MyComponent {
         public void performAfterSelection(Template template) {
             setFieldsByTemplate(template);
             setFieldsAsEditable(true);
+        }
+    }
+
+    private class MyDocumentListener implements DocumentListener {
+
+        @Override
+        public void documentChanged(@NotNull DocumentEvent event) {
+            Template template = templateList.getSelectedValue();
+            String templateScript = template.getScript();
+            String changedScript = scriptDocument.getText();
+            String templateInitScript = template.getInitScript();
+            String changedInitScript = initScriptComponent.getScript();
+            if (!templateScript.equals(changedScript) || !templateInitScript.equals(changedInitScript)) {
+                saveButton.setEnabled(true);
+                saveButton.setForeground(JBColor.RED);
+            } else {
+                saveButton.setEnabled(false);
+                saveButton.setBackground(JBColor.background());
+            }
         }
     }
 }

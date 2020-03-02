@@ -1,8 +1,10 @@
 package pl.suzuyo.template.gui;
 
 import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.util.Key;
 import com.intellij.ui.EditorTextField;
+import org.jetbrains.annotations.NotNull;
 import pl.suzuyo.PsiUtils;
 import pl.suzuyo.common.gui.MyComponent;
 
@@ -51,5 +53,9 @@ public class InitScriptComponent extends MyComponent {
         gridBagConstraints.weighty = 1;
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         initScriptEditorPanel.add(editorTextField.getComponent(), gridBagConstraints);
+    }
+
+    void addDocumentListener(DocumentListener listener) {
+        initScriptDocument.addDocumentListener(listener);
     }
 }

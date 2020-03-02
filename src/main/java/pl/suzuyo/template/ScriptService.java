@@ -2,10 +2,7 @@ package pl.suzuyo.template;
 
 import com.intellij.openapi.components.ServiceManager;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,12 +12,14 @@ public class ScriptService {
         if (script == null) {
             return Collections.emptySet();
         }
-        Set<String> variablesNames = new HashSet<>();
+        Set<String> variablesNames = new TreeSet<>();
         Pattern variablesNamesPattern = Pattern.compile("\\$\\{[A-Z_]*}");
         Matcher variablesNamesMatcher = variablesNamesPattern.matcher(script);
         while (variablesNamesMatcher.find()) {
             String variableName = variablesNamesMatcher.group();
-            variablesNames.add(variableName.substring(2, variableName.length() - 1));
+            if (variableName.length() > 3) {
+                variablesNames.add(variableName.substring(2, variableName.length() - 1));
+            }
 
         }
         return variablesNames;

@@ -13,7 +13,7 @@ import pl.suzuyo.template.gui.InitScriptComponent;
 
 public class InitScriptContributor extends CompletionContributor {
 
-    private static final String VARIABLES_PREFIX = "v:";
+    private static final String VARIABLES_PREFIX = "";
 
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
@@ -46,8 +46,8 @@ public class InitScriptContributor extends CompletionContributor {
         result.addElement(LookupElementBuilder.create("selectedType"));
         result.addElement(LookupElementBuilder.create("selectedParameter"));
         result.addElement(LookupElementBuilder.create("selectedLiteral"));
-        result.addElement(LookupElementBuilder.create("parameters"));
-        result.addElement(LookupElementBuilder.create("variables"));
+        result.addElement(LookupElementBuilder.create("parameters[\"\"]"));
+        result.addElement(LookupElementBuilder.create("variables[\"\"]"));
     }
 
     private boolean acceptVariableElements(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {

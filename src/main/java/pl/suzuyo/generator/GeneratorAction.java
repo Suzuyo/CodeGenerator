@@ -31,6 +31,7 @@ public class GeneratorAction extends AnAction {
         Template template = new GeneratorDialog().showAndGetTemplate();
         if (template != null) {
             List<String> parametersNames = template.getParameters();
+            Collections.sort(parametersNames);
             ParametersDialog parametersDialog = new ParametersDialog(parametersNames);
             Map<String, String> parameters = new HashMap<>();
             if (parametersNames.size() > 0) {

@@ -5,10 +5,8 @@ import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 public abstract class OperatedListPanel<T> extends JPanel {
     private OperatedListEvent<T> operatedListEvent;
@@ -36,12 +34,20 @@ public abstract class OperatedListPanel<T> extends JPanel {
         list.selectFirstOne();
     }
 
+    public void selectLastOne() {
+        list.selectLastOne();
+    }
+
+    public void selectLastIndex() {
+        list.selectLastIndex();
+    }
+
     public List<T> getItems() {
         return list.getItems();
     }
 
     public Set<T> getSetItems() {
-        return new LinkedHashSet<>(getItems());
+        return new TreeSet<>(getItems());
     }
 
     public T getSelectedValue() {
@@ -91,10 +97,13 @@ public abstract class OperatedListPanel<T> extends JPanel {
     }
 
     private void removeElement() {
-        T element = list.removeSelectedItem();
-        if (element != null) {
-            if (operatedListEvent != null) {
-                operatedListEvent.performAfterRemove(element);
+        int response = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete?", "Delete", JOptionPane.YES_NO_OPTION);
+        if (response == 0) {
+            T element = list.removeSelectedItem();
+            if (element != null) {
+                if (operatedListEvent != null) {
+                    operatedListEvent.performAfterRemove(element);
+                }
             }
         }
     }
