@@ -80,16 +80,10 @@ public class ParametersComponent extends MyComponent {
             addedParameterList.addItem(selectedItem);
             parameterRemoveButton.setEnabled(true);
             parameterComboBox.removeItemAt(parameterComboBox.getSelectedIndex());
-            List<String> listSort = new ArrayList<>();
-            for (int i = 0; i < addedParameterList.getItemsCount(); i++) {
-                String items = addedParameterList.getItem(i);
-                listSort.add(items);
-            }
+            List<String> listSort = addedParameterList.getItems();
             Collections.sort(listSort);
             addedParameterList.removeAllItems();
-            for (int i = 0; i < listSort.size(); i++) {
-                addedParameterList.addItem(listSort.get(i));
-            }
+            addedParameterList.setItems(listSort);
             addedParameterList.selectFirstOne();
             if (parameterComboBox.getItemCount() == 0) {
                 parameterAddButton.setEnabled(false);
@@ -107,16 +101,10 @@ public class ParametersComponent extends MyComponent {
             parameterComboBox.addItem(selectedItem);
             parameterAddButton.setEnabled(true);
             parameterComboBox.setEnabled(true);
-            List<String> listSort = new ArrayList<>();
-            for (int i = 0; i < parameterComboBox.getItemCount(); i++) {
-                String items = parameterComboBox.getItemAt(i);
-                listSort.add(items);
-            }
+            List<String> listSort = parameterComboBox.getItems();
             Collections.sort(listSort);
             parameterComboBox.removeAllItems();
-            for (int i = 0; i < listSort.size(); i++) {
-                parameterComboBox.addItem(listSort.get(i));
-            }
+            parameterComboBox.setItems(listSort);
             if (addedParameterList.getItemsCount() > 0) {
                 addedParameterList.selectFirstOne();
             }
@@ -132,7 +120,7 @@ public class ParametersComponent extends MyComponent {
         }
     }
 
-    public int sum() {
+    public int getParametersCount() {
         return parameterComboBox.getItemCount() + addedParameterList.getItemsCount();
     }
 }

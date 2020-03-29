@@ -13,6 +13,7 @@ import com.intellij.openapi.fileChooser.FileSaverDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileWrapper;
 import com.intellij.ui.JBColor;
@@ -26,7 +27,6 @@ import pl.suzuyo.template.Template;
 
 import javax.swing.*;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -47,7 +47,7 @@ public class TemplatesComponent extends MyComponent {
     private JTabbedPane jTabbedPanel;
     private Document scriptDocument;
     private ParametersComponent parametersComponent;
-    private Set<String> variablesNames;
+    private boolean changeText;
 
     @Override
     public JPanel getRootPanel() {
@@ -63,6 +63,7 @@ public class TemplatesComponent extends MyComponent {
         exportButton.addActionListener(event -> exportTemplates());
         scriptDocument.addDocumentListener(new MyDocumentListener());
         initScriptComponent.addDocumentListener(new MyDocumentListener());
+        templateNameField.getDocument().addDocumentListener(new MyDocumentListener());
     }
 
     @Override
@@ -90,7 +91,7 @@ public class TemplatesComponent extends MyComponent {
         parametersComponent.setParameters(new ArrayList<>(template.getVariablesWithoutParameters()));
         parametersComponent.initFieldsValues();
         initScriptComponent.setScript(template.getInitScript());
-        variablesNames = template.getVariables();
+        Set<String> variablesNames = template.getVariables();
         initScriptComponent.setCompleteVariables(variablesNames);
         PsiUtils.setTextForDocument(scriptDocument, template.getScript());
     }
@@ -112,9 +113,9 @@ public class TemplatesComponent extends MyComponent {
             }
             template.setInitScript(initScriptComponent.getScript());
             template.setScript(scriptDocument.getText());
-            variablesNames = template.getVariables();
+            Set<String> variablesNames = template.getVariables();
             int countParameters = template.getParameters().size();
-            List<String> templateParameters = new ArrayList<>(template.getParameters());
+            List<String> templateParameters = template.getParameters();
             Collections.sort(templateParameters);
             for (int i = 0; i < templateParameters.size(); i++) {
                 String parameter = templateParameters.get(i);
@@ -126,7 +127,7 @@ public class TemplatesComponent extends MyComponent {
                     }
                 }
             }
-            if (variablesNames.size() < countParameters || (countParameters > 0 && parametersComponent.sum() != variablesNames.size())) {
+            if (variablesNames.size() < countParameters || (countParameters > 0 && parametersComponent.getParametersCount() != variablesNames.size())) {
                 for (int i = 0; i < countParameters; i++) {
                     Iterator<String> variablesList = variablesNames.iterator();
                     boolean foundParameter = false;
@@ -144,7 +145,8 @@ public class TemplatesComponent extends MyComponent {
                 }
             }
             templateList.saveToStorage();
-            templateList.loadFromStorage();
+            saveButton.setEnabled(false);
+            changeText = false;
         }
     }
 
@@ -232,7 +234,7 @@ public class TemplatesComponent extends MyComponent {
             }
         } catch (IOException e) {
             String message = e.getMessage();
-            JOptionPane.showMessageDialog(null, message);
+            Messages.showErrorDialog(message, "Export Error");
             throw new RuntimeException("Export failed", e);
         }
     }
@@ -268,12 +270,31 @@ public class TemplatesComponent extends MyComponent {
 
         @Override
         public void performAfterRemoveSelection() {
-            clearFields();
-            setFieldsAsEditable(false);
+
+        }
+
+        @Override
+        public void performAfterArrow() {
+             templateList.saveToStorage();
+        }
+
+        @Override
+        public void performBeforeSelection2() {
+            if (changeText) {
+                int response = Messages.showYesNoDialog("Do you want to save the changes?", "Save", Messages.getInformationIcon());
+                if (response == 0) {
+                    Template template = templateList.getSelectedValue();
+                    template.setName(templateNameField.getText());
+                    template.setInitScript(initScriptComponent.getScript());
+                    template.setScript(scriptDocument.getText());
+                    templateList.saveToStorage();
+                }
+            }
         }
 
         @Override
         public void performBeforeSelection(Template template) {
+
         }
 
         @Override
@@ -283,21 +304,46 @@ public class TemplatesComponent extends MyComponent {
         }
     }
 
-    private class MyDocumentListener implements DocumentListener {
+    private class MyDocumentListener implements DocumentListener, javax.swing.event.DocumentListener {
 
         @Override
         public void documentChanged(@NotNull DocumentEvent event) {
-            Template template = templateList.getSelectedValue();
+            change();
+        }
+
+        @Override
+        public void insertUpdate(javax.swing.event.DocumentEvent e) {
+            change();
+        }
+
+        @Override
+        public void removeUpdate(javax.swing.event.DocumentEvent e) {
+            change();
+        }
+
+        @Override
+        public void changedUpdate(javax.swing.event.DocumentEvent e) {
+            change();
+        }
+    }
+
+    private void change() {
+        Template template = templateList.getSelectedValue();
+        if (template != null) {
             String templateScript = template.getScript();
             String changedScript = scriptDocument.getText();
             String templateInitScript = template.getInitScript();
             String changedInitScript = initScriptComponent.getScript();
-            if (!templateScript.equals(changedScript) || !templateInitScript.equals(changedInitScript)) {
+            String templateName = template.getName();
+            String changedTemplateName = templateNameField.getText();
+            if (!templateScript.equals(changedScript) || !templateInitScript.equals(changedInitScript) || !templateName.equals(changedTemplateName)) {
                 saveButton.setEnabled(true);
                 saveButton.setForeground(JBColor.RED);
+                changeText = true;
             } else {
                 saveButton.setEnabled(false);
                 saveButton.setBackground(JBColor.background());
+                changeText = false;
             }
         }
     }

@@ -1,10 +1,13 @@
 package pl.suzuyo.common.gui;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 
@@ -34,10 +37,6 @@ public abstract class OperatedListPanel<T> extends JPanel {
         list.selectFirstOne();
     }
 
-    public void selectLastOne() {
-        list.selectLastOne();
-    }
-
     public void selectLastIndex() {
         list.selectLastIndex();
     }
@@ -54,11 +53,23 @@ public abstract class OperatedListPanel<T> extends JPanel {
         return list.getSelectedValue();
     }
 
+    public T getPreviousSelectedValue() {
+        return previousSelectedValue;
+    }
+
     public boolean isEmpty() {
         return list.isEmpty();
     }
 
     protected abstract T createElement();
+
+    public JButton getArrowDown() {
+        return arrowDown;
+    }
+
+    public JButton getArrowUp() {
+        return arrowUp;
+    }
 
     private void addOperationsPanel(JPanel parentPanel) {
         JPanel panel = new JPanel();
@@ -97,7 +108,7 @@ public abstract class OperatedListPanel<T> extends JPanel {
     }
 
     private void removeElement() {
-        int response = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete?", "Delete", JOptionPane.YES_NO_OPTION);
+        int response = Messages.showYesNoDialog("Are you sure you want to delete?", "Delete", Messages.getInformationIcon());
         if (response == 0) {
             T element = list.removeSelectedItem();
             if (element != null) {
@@ -110,18 +121,21 @@ public abstract class OperatedListPanel<T> extends JPanel {
 
     private void addArrowUp(JPanel panel) {
         arrowUp = new IconButton(AllIcons.General.ArrowUp);
+        arrowUp.addActionListener(event -> operatedListEvent.performAfterArrow());
         arrowUp.addActionListener(event -> list.downItem());
         panel.add(arrowUp);
     }
 
     private void addArrowDown(JPanel panel) {
         arrowDown = new IconButton(AllIcons.General.ArrowDown);
+        arrowDown.addActionListener(event -> operatedListEvent.performAfterArrow());
         arrowDown.addActionListener(event -> list.upItem());
         panel.add(arrowDown);
     }
 
     private void addScrollList(JPanel parentPanel) {
         list = new MyList<>();
+        list.setListEvent(this::beforeSelectedElement);
         list.addListSelectionListener(event -> selectElement());
         JBScrollPane scrollPane = new JBScrollPane(list);
         scrollPane.setPreferredSize(new Dimension(100, Integer.MAX_VALUE));
@@ -133,6 +147,10 @@ public abstract class OperatedListPanel<T> extends JPanel {
         gridBagConstraints.weighty = 1;
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         parentPanel.add(scrollPane, gridBagConstraints);
+    }
+
+    private void beforeSelectedElement() {
+        operatedListEvent.performBeforeSelection2();
     }
 
     private void selectElement() {

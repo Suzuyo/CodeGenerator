@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.util.*;
 
 public class MyList<T> extends JBList<T> {
-
+    private ListEvent listEvent;
     private DefaultListModel<T> model;
     private int getIndex;
 
@@ -18,6 +18,10 @@ public class MyList<T> extends JBList<T> {
         setBorder(BorderFactory.createEmptyBorder());
         setCellRenderer(new DefaultListCellRenderer());
         setModel(model);
+    }
+
+    public void setListEvent(ListEvent listEvent) {
+        this.listEvent = listEvent;
     }
 
     public void addItem(T item) {
@@ -112,5 +116,11 @@ public class MyList<T> extends JBList<T> {
 
     public void removeAllSelectionValues() {
         removeSelectionInterval(0, model.getSize());
+    }
+
+    @Override
+    public void setSelectionInterval(int anchor, int lead) {
+        listEvent.beforeSelected();
+        super.setSelectionInterval(anchor, lead);
     }
 }

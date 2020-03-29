@@ -6,4 +6,6 @@ public interface OperatedListEvent<T> {
     void performAfterRemoveSelection();
     void performBeforeSelection(T element);
     void performAfterSelection(T element);
+    void performAfterArrow();
+    void performBeforeSelection2();
 }

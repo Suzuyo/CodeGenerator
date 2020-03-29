@@ -13,7 +13,7 @@ import pl.suzuyo.template.gui.InitScriptComponent;
 
 public class InitScriptContributor extends CompletionContributor {
 
-    private static final String VARIABLES_PREFIX = "";
+    private static final String VARIABLES_PREFIX = "v:";
 
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
