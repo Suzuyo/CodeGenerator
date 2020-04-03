@@ -6,8 +6,6 @@ import com.intellij.ui.components.JBScrollPane;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.*;
 import java.util.List;
 
@@ -135,6 +133,7 @@ public abstract class OperatedListPanel<T> extends JPanel {
 
     private void addScrollList(JPanel parentPanel) {
         list = new MyList<>();
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setListEvent(this::beforeSelectedElement);
         list.addListSelectionListener(event -> selectElement());
         JBScrollPane scrollPane = new JBScrollPane(list);
