@@ -120,7 +120,9 @@ public class MyList<T> extends JBList<T> {
 
     @Override
     public void setSelectionInterval(int anchor, int lead) {
-        listEvent.beforeSelected();
+        if (listEvent != null) {
+            listEvent.beforeSelected();
+        }
         super.setSelectionInterval(anchor, lead);
     }
 }

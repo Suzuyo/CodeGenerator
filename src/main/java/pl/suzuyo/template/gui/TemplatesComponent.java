@@ -48,6 +48,7 @@ public class TemplatesComponent extends MyComponent {
     private Document scriptDocument;
     private ParametersComponent parametersComponent;
     private boolean changeText;
+    private Set<String> variablesNames;
 
     @Override
     public JPanel getRootPanel() {
@@ -91,7 +92,7 @@ public class TemplatesComponent extends MyComponent {
         parametersComponent.setParameters(new ArrayList<>(template.getVariablesWithoutParameters()));
         parametersComponent.initFieldsValues();
         initScriptComponent.setScript(template.getInitScript());
-        Set<String> variablesNames = template.getVariables();
+        variablesNames = template.getVariables();
         initScriptComponent.setCompleteVariables(variablesNames);
         PsiUtils.setTextForDocument(scriptDocument, template.getScript());
     }
@@ -113,9 +114,9 @@ public class TemplatesComponent extends MyComponent {
             }
             template.setInitScript(initScriptComponent.getScript());
             template.setScript(scriptDocument.getText());
-            Set<String> variablesNames = template.getVariables();
+            variablesNames = template.getVariables();
             int countParameters = template.getParameters().size();
-            List<String> templateParameters = template.getParameters();
+            List<String> templateParameters = new ArrayList<>(template.getParameters());
             Collections.sort(templateParameters);
             for (int i = 0; i < templateParameters.size(); i++) {
                 String parameter = templateParameters.get(i);
@@ -145,6 +146,7 @@ public class TemplatesComponent extends MyComponent {
                 }
             }
             templateList.saveToStorage();
+            templateList.loadFromStorage();
             saveButton.setEnabled(false);
             changeText = false;
         }
@@ -181,7 +183,7 @@ public class TemplatesComponent extends MyComponent {
                             for (int j = 0; j < templates.size(); j++) {
                                 String second = templates.get(j).getName();
                                 if (first.equals(second)) {
-                                    TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog("Template about name " + first + " already exists. Do you want to replace it?");
+                                    TemplatesImportDialog templatesImportDialog = new TemplatesImportDialog(first);
                                     templatesImportDialog.showAndGet();
                                     if (templatesImportDialog.getExitCode() == DialogWrapper.OK_EXIT_CODE) {
                                         templates.set(j, filterImportTemplates.get(i));

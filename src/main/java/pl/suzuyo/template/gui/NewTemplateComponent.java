@@ -39,6 +39,8 @@ public class NewTemplateComponent extends MyComponent {
         Template template = new Template();
         template.setName(templateNameField.getText());
         template.setType(templateTypeField.getSelectedItem());
+        template.setInitScript("");
+        template.setScript("");
         return template;
     }
 }
